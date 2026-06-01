@@ -1,0 +1,20 @@
+name: Family Birthday Reminders
+
+on:
+  schedule:
+    # 北京时间 9:00 = UTC 1:00
+    - cron: '0 1 * * *'
+  workflow_dispatch:  # 允许手动触发测试
+
+jobs:
+  check-and-remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run reminder check
+        run: node reminder.js
+        env:
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
