@@ -1,0 +1,10 @@
+{
+  "name": "family-reminders",
+  "version": "1.0.0",
+  "description": "庄老大家庭重要日子微信提醒",
+  "private": true,
+  "scripts": {
+    "start": "node reminder.js",
+    "test": "node reminder.js"
+  }
+}
