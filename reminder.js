@@ -41,6 +41,7 @@ const REMINDERS = [
 // 农历正月22 → 公历对照表（每年元旦前更新！）
 // ============================================================
 const LUNAR_BIRTHDAY_MAP = {
+  '2026': { monthDay: '03-10', advance5: '03-05', advance2: '03-08' },
   '2027': { monthDay: '02-27', advance5: '02-22', advance2: '02-25' },
   '2028': { monthDay: '02-16', advance5: '02-11', advance2: '02-14' },
   '2029': { monthDay: '03-06', advance5: '03-01', advance2: '03-04' },
@@ -55,20 +56,20 @@ async function main() {
   const yearStr = String(now.getFullYear());
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
-  const todayMMDD = `${mm}-${dd}`;
+  const todayMMDD = mm + '-' + dd;
 
-  console.log(`[${now.toISOString()}] 北京时间 ${now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })} | 检查: ${todayMMDD}`);
+  console.log('[' + now.toISOString() + '] 北京时间 ' + now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }) + ' | 检查: ' + todayMMDD);
 
   const messages = [];
 
   // ---- 公历提醒 ----
   for (const r of REMINDERS) {
     if (todayMMDD === r.monthDay) {
-      messages.push(`${r.emoji} 今天就是【${r.name}】！别忘了庆祝！`);
+      messages.push(r.emoji + ' 今天就是【' + r.name + '】！别忘了庆祝！');
     } else if (todayMMDD === r.advance5) {
-      messages.push(`📅 距离【${r.name}】还有 5 天（${r.monthDay}），该准备礼物和安排了。`);
+      messages.push('📅 距离【' + r.name + '】还有 5 天（' + r.monthDay + '），该准备礼物和安排了。');
     } else if (todayMMDD === r.advance2) {
-      messages.push(`⚠️ 【${r.name}】就在后天（${r.monthDay}）！最后准备时间！`);
+      messages.push('⚠️ 【' + r.name + '】就在后天（' + r.monthDay + '）！最后准备时间！');
     }
   }
 
@@ -76,14 +77,14 @@ async function main() {
   const lunarEntry = LUNAR_BIRTHDAY_MAP[yearStr];
   if (lunarEntry) {
     if (todayMMDD === lunarEntry.monthDay) {
-      messages.push(`👸🎂 今天就是老婆农历生日（正月二十二）！`);
+      messages.push('👸🎂 今天就是老婆农历生日（正月二十二）！');
     } else if (todayMMDD === lunarEntry.advance5) {
-      messages.push(`📅 距离老婆农历生日还有 5 天（${yearStr} 年公历 ${lunarEntry.monthDay}），该准备礼物了！`);
+      messages.push('📅 距离老婆农历生日还有 5 天（' + yearStr + ' 年公历 ' + lunarEntry.monthDay + '），该准备礼物了！');
     } else if (todayMMDD === lunarEntry.advance2) {
-      messages.push(`⚠️ 老婆农历生日就是后天（${yearStr} 年公历 ${lunarEntry.monthDay}）！最后准备！`);
+      messages.push('⚠️ 老婆农历生日就是后天（' + yearStr + ' 年公历 ' + lunarEntry.monthDay + '）！最后准备！');
     }
   } else {
-    console.warn(`⚠️ 年份 ${yearStr} 的农历正月22未配置！请更新 LUNAR_BIRTHDAY_MAP`);
+    console.warn('⚠️ 年份 ' + yearStr + ' 的农历正月22未配置！请更新 LUNAR_BIRTHDAY_MAP');
   }
 
   // ---- 无提醒 ----
@@ -96,15 +97,19 @@ async function main() {
   const sendKey = process.env.SERVERCHAN_SENDKEY;
   if (!sendKey) {
     console.error('SERVERCHAN_SENDKEY 未配置！请在 GitHub Secrets 中设置。');
-    console.log('本应推送的消息:\n', messages.join('\n'));
+    console.log('本应推送的消息:
+', messages.join('
+'));
     process.exit(1);
   }
 
-  const content = messages.join('\n\n');
-  console.log(`准备推送 ${messages.length} 条提醒...`);
+  const content = messages.join('
+
+');
+  console.log('准备推送 ' + messages.length + ' 条提醒...');
 
   try {
-    const resp = await fetch(`https://sctapi.ftqq.com/${sendKey}.send`, {
+    const resp = await fetch('https://sctapi.ftqq.com/' + sendKey + '.send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify({ title: '📅 重要日子提醒', desp: content }),
